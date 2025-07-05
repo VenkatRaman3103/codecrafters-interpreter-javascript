@@ -1,6 +1,9 @@
 {
-  "name": "@codecrafters/interpreter",
-  "version": "1.0.0",
-  "type": "module",
-  "dependencies": {}
+    "name": "@codecrafters/interpreter",
+    "type": "module",
+    "version": "1.0.0",
+    "devDependencies": {
+        "eslint_d": "^14.3.0",
+        "prettier": "^3.6.2"
+    }
 }
