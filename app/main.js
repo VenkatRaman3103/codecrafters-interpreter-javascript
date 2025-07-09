@@ -248,6 +248,12 @@ function parseExpression(tokens) {
     if (tokens[0].type === "LEFT_PAREN") {
         const inner = parseExpression(tokens.slice(1));
         return `(group ${inner})`;
+    } else if (tokens[0].type === "BANG") {
+        const inner = parseExpression(tokens.slice(1));
+        return `(! ${inner})`;
+    } else if (tokens[0].type === "MINUS") {
+        const inner = parseExpression(tokens.slice(1));
+        return `(- ${inner})`;
     }
 
     const token = tokens[0];
