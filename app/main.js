@@ -42,8 +42,6 @@ function tokenizer(fileContent, lineNumber) {
             console.log("MINUS - null");
         } else if (char === ";") {
             console.log("SEMICOLON ; null");
-        } else if (char == "/") {
-            console.log("SLASH / null");
         } else if (char == "=") {
             if (fileContent[cursor + 1] == "=") {
                 console.log("EQUAL_EQUAL == null");
@@ -72,8 +70,16 @@ function tokenizer(fileContent, lineNumber) {
             } else {
                 console.log("GREATER > null");
             }
-        } else if (char == " ") {
-            continue;
+        } else if (char == "/") {
+            if (fileContent[cursor + 1] == "/") {
+                cursor++;
+                while (char !== "\n" && cursor < fileContent.length) {
+                    char = fileContent[cursor];
+                    cursor++;
+                }
+            } else {
+                console.log("SLASH / null");
+            }
         } else {
             console.error(
                 `[line ${lineNumber}] Error: Unexpected character: ${char}`,
