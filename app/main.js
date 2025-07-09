@@ -18,6 +18,25 @@ if (command !== "tokenize") {
     process.exit(1);
 }
 
+const keyword = {
+    and: "AND",
+    class: "CLASS",
+    else: "ELSE",
+    if: "IF",
+    for: "FOR",
+    false: "FALSE",
+    fun: "FUN",
+    nil: "NIL",
+    or: "OR",
+    print: "PRINT",
+    return: "RETURN",
+    super: "SUPER",
+    this: "THIS",
+    true: "TRUE",
+    var: "VAR",
+    while: "WHILE",
+};
+
 // tokenizer helper functions
 function isChar(ch) {
     return (ch >= "a" && ch <= "z") || (ch >= "A" && ch <= "Z");
@@ -151,7 +170,9 @@ function tokenizer(fileContent, lineNumber) {
             }
             cursor--;
 
-            console.log(`IDENTIFIER ${str} null`);
+            if (keyword[str]) {
+                console.log(`${keyword[str]} ${str} null`);
+            }
         } else if (
             char === " " ||
             char === "\t" ||
