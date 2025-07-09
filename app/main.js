@@ -246,9 +246,19 @@ function tokenizer(fileContent) {
 
 function parseExpression(tokens) {
     let index = 0;
+    let foundError = false;
+
+    function error(token, message) {
+        console.error(
+            `[line ${token.line}] Error at '${token.lexeme}': ${message}`,
+        );
+        foundError = true;
+        return null;
+    }
 
     function parseEquality() {
         let left = parseComparison();
+        if (left === null) return null;
 
         while (
             index < tokens.length &&
@@ -258,6 +268,7 @@ function parseExpression(tokens) {
             const operator = tokens[index].lexeme;
             index++;
             const right = parseComparison();
+            if (right === null) return null;
             left = `(${operator} ${left} ${right})`;
         }
 
@@ -266,6 +277,7 @@ function parseExpression(tokens) {
 
     function parseComparison() {
         let left = parseAddition();
+        if (left === null) return null;
 
         while (
             index < tokens.length &&
@@ -277,6 +289,7 @@ function parseExpression(tokens) {
             const operator = tokens[index].lexeme;
             index++;
             const right = parseAddition();
+            if (right === null) return null;
             left = `(${operator} ${left} ${right})`;
         }
 
@@ -285,6 +298,7 @@ function parseExpression(tokens) {
 
     function parseAddition() {
         let left = parseMultiplication();
+        if (left === null) return null;
 
         while (
             index < tokens.length &&
@@ -293,6 +307,7 @@ function parseExpression(tokens) {
             const operator = tokens[index].lexeme;
             index++;
             const right = parseMultiplication();
+            if (right === null) return null;
             left = `(${operator} ${left} ${right})`;
         }
 
@@ -301,6 +316,7 @@ function parseExpression(tokens) {
 
     function parseMultiplication() {
         let left = parseUnary();
+        if (left === null) return null;
 
         while (
             index < tokens.length &&
@@ -309,6 +325,7 @@ function parseExpression(tokens) {
             const operator = tokens[index].lexeme;
             index++;
             const right = parseUnary();
+            if (right === null) return null;
             left = `(${operator} ${left} ${right})`;
         }
 
@@ -319,10 +336,12 @@ function parseExpression(tokens) {
         if (tokens[index].type === "BANG") {
             index++;
             const expr = parseUnary();
+            if (expr === null) return null;
             return `(! ${expr})`;
         } else if (tokens[index].type === "MINUS") {
             index++;
             const expr = parseUnary();
+            if (expr === null) return null;
             return `(- ${expr})`;
         }
 
@@ -330,23 +349,44 @@ function parseExpression(tokens) {
     }
 
     function parsePrimary() {
+        if (index >= tokens.length || tokens[index].type === "EOF") {
+            const token = tokens[index - 1] || { lexeme: "", line: 1 };
+            return error(token, "Expect expression.");
+        }
+
         if (tokens[index].type === "LEFT_PAREN") {
+            const parenToken = tokens[index];
             index++;
             const expr = parseEquality();
+            if (expr === null) return null;
+
+            if (
+                index >= tokens.length ||
+                tokens[index].type !== "RIGHT_PAREN"
+            ) {
+                const currentToken = tokens[index] || {
+                    lexeme: "",
+                    line: parenToken.line,
+                };
+                return error(currentToken, "Expect ')' after expression.");
+            }
             index++;
             return `(group ${expr})`;
         }
 
         const token = tokens[index];
-        index++;
 
         if (token.type === "TRUE") {
+            index++;
             return "true";
         } else if (token.type === "FALSE") {
+            index++;
             return "false";
         } else if (token.type === "NIL") {
+            index++;
             return "nil";
         } else if (token.type === "NUMBER") {
+            index++;
             const num = token.literal;
             if (num % 1 === 0) {
                 return num.toFixed(1);
@@ -354,13 +394,21 @@ function parseExpression(tokens) {
                 return num.toString();
             }
         } else if (token.type === "STRING") {
+            index++;
             return token.literal;
+        } else if (token.type === "IDENTIFIER") {
+            index++;
+            return token.lexeme;
         }
 
-        return null;
+        return error(token, "Expect expression.");
     }
 
-    return parseEquality();
+    const result = parseEquality();
+    if (foundError) {
+        return { error: true };
+    }
+    return result;
 }
 
 // file path
@@ -385,6 +433,10 @@ if (command === "tokenize") {
     }
 
     const result = parseExpression(tokens);
+    if (result === null || (result && result.error)) {
+        process.exit(65);
+    }
+
     if (result) {
         console.log(result);
     }
