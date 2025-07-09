@@ -1,4 +1,5 @@
 import fs from "fs";
+import { type } from "os";
 
 const args = process.argv.slice(2);
 
@@ -97,6 +98,36 @@ function tokenizer(fileContent, lineNumber) {
                 );
                 foundError = true;
             }
+        } else if (/\d/.test(char)) {
+            let number = "";
+            let hasDecimal = false;
+
+            while (cursor < fileContent.length) {
+                const currentChar = fileContent[cursor];
+
+                if (/\d/.test(currentChar)) {
+                    number += currentChar;
+                    cursor++;
+                } else if (currentChar === "." && !hasDecimal) {
+                    hasDecimal = true;
+                    number += currentChar;
+                    cursor++;
+                } else {
+                    break;
+                }
+            }
+
+            cursor--;
+
+            let literalValue;
+            if (hasDecimal) {
+                const parsed = parseFloat(number);
+                literalValue = parsed % 1 === 0 ? parsed.toFixed(1) : parsed;
+            } else {
+                literalValue = parseFloat(number).toFixed(1);
+            }
+
+            console.log(`NUMBER ${number} ${literalValue}`);
         } else if (
             char === " " ||
             char === "\t" ||
