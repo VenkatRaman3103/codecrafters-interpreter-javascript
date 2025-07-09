@@ -80,6 +80,13 @@ function tokenizer(fileContent, lineNumber) {
             } else {
                 console.log("SLASH / null");
             }
+        } else if (
+            char === " " ||
+            char === "\t" ||
+            char === "\r" ||
+            char === "\n"
+        ) {
+            continue;
         } else {
             console.error(
                 `[line ${lineNumber}] Error: Unexpected character: ${char}`,
