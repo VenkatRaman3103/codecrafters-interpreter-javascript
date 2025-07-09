@@ -1,5 +1,4 @@
 import fs from "fs";
-import { type } from "os";
 
 const args = process.argv.slice(2);
 
@@ -13,7 +12,7 @@ let foundError = false;
 // command
 const command = args[0];
 
-if (command !== "tokenize") {
+if (command !== "tokenize" && command !== "parse") {
     console.error(`Usage: Unknown command: ${command}`);
     process.exit(1);
 }
@@ -37,6 +36,15 @@ const keyword = {
     while: "WHILE",
 };
 
+class Token {
+    constructor(type, lexeme, literal, line) {
+        this.type = type;
+        this.lexeme = lexeme;
+        this.literal = literal;
+        this.line = line;
+    }
+}
+
 // tokenizer helper functions
 function isChar(ch) {
     return (ch >= "a" && ch <= "z") || (ch >= "A" && ch <= "Z");
@@ -47,67 +55,93 @@ function isNumber(ch) {
 }
 
 // tokenizer
-function tokenizer(fileContent, lineNumber) {
+function tokenizer(fileContent) {
+    const tokens = [];
+    let lineNumber = 1;
+
     for (let cursor = 0; cursor < fileContent.length; cursor++) {
         let char = fileContent[cursor];
 
         if (char === "(") {
-            console.log("LEFT_PAREN ( null");
+            tokens.push(new Token("LEFT_PAREN", "(", null, lineNumber));
+            if (command === "tokenize") console.log("LEFT_PAREN ( null");
         } else if (char === ")") {
-            console.log("RIGHT_PAREN ) null");
+            tokens.push(new Token("RIGHT_PAREN", ")", null, lineNumber));
+            if (command === "tokenize") console.log("RIGHT_PAREN ) null");
         } else if (char === "{") {
-            console.log("LEFT_BRACE { null");
+            tokens.push(new Token("LEFT_BRACE", "{", null, lineNumber));
+            if (command === "tokenize") console.log("LEFT_BRACE { null");
         } else if (char === "}") {
-            console.log("RIGHT_BRACE } null");
+            tokens.push(new Token("RIGHT_BRACE", "}", null, lineNumber));
+            if (command === "tokenize") console.log("RIGHT_BRACE } null");
         } else if (char === "*") {
-            console.log("STAR * null");
+            tokens.push(new Token("STAR", "*", null, lineNumber));
+            if (command === "tokenize") console.log("STAR * null");
         } else if (char === ".") {
-            console.log("DOT . null");
+            tokens.push(new Token("DOT", ".", null, lineNumber));
+            if (command === "tokenize") console.log("DOT . null");
         } else if (char === ",") {
-            console.log("COMMA , null");
+            tokens.push(new Token("COMMA", ",", null, lineNumber));
+            if (command === "tokenize") console.log("COMMA , null");
         } else if (char === "+") {
-            console.log("PLUS + null");
+            tokens.push(new Token("PLUS", "+", null, lineNumber));
+            if (command === "tokenize") console.log("PLUS + null");
         } else if (char === "-") {
-            console.log("MINUS - null");
+            tokens.push(new Token("MINUS", "-", null, lineNumber));
+            if (command === "tokenize") console.log("MINUS - null");
         } else if (char === ";") {
-            console.log("SEMICOLON ; null");
+            tokens.push(new Token("SEMICOLON", ";", null, lineNumber));
+            if (command === "tokenize") console.log("SEMICOLON ; null");
         } else if (char == "=") {
             if (fileContent[cursor + 1] == "=") {
-                console.log("EQUAL_EQUAL == null");
+                tokens.push(new Token("EQUAL_EQUAL", "==", null, lineNumber));
+                if (command === "tokenize") console.log("EQUAL_EQUAL == null");
                 cursor++;
             } else {
-                console.log("EQUAL = null");
+                tokens.push(new Token("EQUAL", "=", null, lineNumber));
+                if (command === "tokenize") console.log("EQUAL = null");
             }
         } else if (char == "!") {
             if (fileContent[cursor + 1] == "=") {
-                console.log("BANG_EQUAL != null");
+                tokens.push(new Token("BANG_EQUAL", "!=", null, lineNumber));
+                if (command === "tokenize") console.log("BANG_EQUAL != null");
                 cursor++;
             } else {
-                console.log("BANG ! null");
+                tokens.push(new Token("BANG", "!", null, lineNumber));
+                if (command === "tokenize") console.log("BANG ! null");
             }
         } else if (char == "<") {
             if (fileContent[cursor + 1] == "=") {
-                console.log("LESS_EQUAL <= null");
+                tokens.push(new Token("LESS_EQUAL", "<=", null, lineNumber));
+                if (command === "tokenize") console.log("LESS_EQUAL <= null");
                 cursor++;
             } else {
-                console.log("LESS < null");
+                tokens.push(new Token("LESS", "<", null, lineNumber));
+                if (command === "tokenize") console.log("LESS < null");
             }
         } else if (char == ">") {
             if (fileContent[cursor + 1] == "=") {
-                console.log("GREATER_EQUAL >= null");
+                tokens.push(new Token("GREATER_EQUAL", ">=", null, lineNumber));
+                if (command === "tokenize")
+                    console.log("GREATER_EQUAL >= null");
                 cursor++;
             } else {
-                console.log("GREATER > null");
+                tokens.push(new Token("GREATER", ">", null, lineNumber));
+                if (command === "tokenize") console.log("GREATER > null");
             }
         } else if (char == "/") {
             if (fileContent[cursor + 1] == "/") {
                 cursor++;
-                while (char !== "\n" && cursor < fileContent.length) {
-                    char = fileContent[cursor];
+                while (
+                    cursor < fileContent.length &&
+                    fileContent[cursor] !== "\n"
+                ) {
                     cursor++;
                 }
+                cursor--;
             } else {
-                console.log("SLASH / null");
+                tokens.push(new Token("SLASH", "/", null, lineNumber));
+                if (command === "tokenize") console.log("SLASH / null");
             }
         } else if (char === '"') {
             let string = "";
@@ -119,7 +153,11 @@ function tokenizer(fileContent, lineNumber) {
             }
 
             if (cursor < fileContent.length && fileContent[cursor] === '"') {
-                console.log(`STRING "${string}" ${string}`);
+                tokens.push(
+                    new Token("STRING", `"${string}"`, string, lineNumber),
+                );
+                if (command === "tokenize")
+                    console.log(`STRING "${string}" ${string}`);
             } else {
                 console.error(
                     `[line ${lineNumber}] Error: Unterminated string.`,
@@ -155,7 +193,16 @@ function tokenizer(fileContent, lineNumber) {
                 literalValue = parseFloat(number).toFixed(1);
             }
 
-            console.log(`NUMBER ${number} ${literalValue}`);
+            tokens.push(
+                new Token(
+                    "NUMBER",
+                    number,
+                    parseFloat(literalValue),
+                    lineNumber,
+                ),
+            );
+            if (command === "tokenize")
+                console.log(`NUMBER ${number} ${literalValue}`);
         } else if (isChar(char) || char == "_") {
             let str = "";
 
@@ -171,16 +218,17 @@ function tokenizer(fileContent, lineNumber) {
             cursor--;
 
             if (keyword[str]) {
-                console.log(`${keyword[str]} ${str} null`);
+                tokens.push(new Token(keyword[str], str, null, lineNumber));
+                if (command === "tokenize")
+                    console.log(`${keyword[str]} ${str} null`);
             } else {
-                console.log(`IDENTIFIER ${str} null`);
+                tokens.push(new Token("IDENTIFIER", str, null, lineNumber));
+                if (command === "tokenize")
+                    console.log(`IDENTIFIER ${str} null`);
             }
-        } else if (
-            char === " " ||
-            char === "\t" ||
-            char === "\r" ||
-            char === "\n"
-        ) {
+        } else if (char === "\n") {
+            lineNumber++;
+        } else if (char === " " || char === "\t" || char === "\r") {
             continue;
         } else {
             console.error(
@@ -189,6 +237,26 @@ function tokenizer(fileContent, lineNumber) {
             foundError = true;
         }
     }
+
+    tokens.push(new Token("EOF", "", null, lineNumber));
+    if (command === "tokenize") console.log("EOF  null");
+
+    return tokens;
+}
+
+// parser
+function parseExpression(tokens) {
+    const token = tokens[0];
+
+    if (token.type === "TRUE") {
+        return "true";
+    } else if (token.type === "FALSE") {
+        return "false";
+    } else if (token.type === "NIL") {
+        return "nil";
+    }
+
+    return null;
 }
 
 // file path
@@ -196,17 +264,24 @@ const filename = args[1];
 
 const fileContent = fs.readFileSync(filename, "utf8");
 
-if (fileContent.length !== 0) {
-    let lines = fileContent.split("\n");
-
-    for (let line = 0; line < lines.length; line++) {
-        tokenizer(lines[line], line + 1);
+if (command === "tokenize") {
+    if (fileContent.length !== 0) {
+        tokenizer(fileContent);
+    } else {
+        console.log("EOF  null");
     }
-    console.log("EOF  null");
 
     if (foundError) {
         process.exit(65);
     }
-} else {
-    console.log("EOF  null");
+} else if (command === "parse") {
+    const tokens = tokenizer(fileContent);
+    if (foundError) {
+        process.exit(65);
+    }
+
+    const result = parseExpression(tokens);
+    if (result) {
+        console.log(result);
+    }
 }
