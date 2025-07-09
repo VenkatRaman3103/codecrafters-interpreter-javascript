@@ -7,6 +7,8 @@ if (args.length < 2) {
     process.exit(1);
 }
 
+let foundError = false;
+
 // command
 const command = args[0];
 
@@ -15,13 +17,8 @@ if (command !== "tokenize") {
     process.exit(1);
 }
 
-// file path
-const filename = args[1];
-
-const fileContent = fs.readFileSync(filename, "utf8");
-
-if (fileContent.length !== 0) {
-    // tokenize
+// tokenizer
+function tokenizer(fileContent, lineNumber) {
     for (let cursor = 0; cursor < fileContent.length; cursor++) {
         let char = fileContent[cursor];
 
@@ -47,9 +44,31 @@ if (fileContent.length !== 0) {
             console.log("SEMICOLON ; null");
         } else if (char == "/") {
             console.log("SLASH / null");
+        } else {
+            console.error(
+                `[line ${lineNumber}] Error: Unexpected character: ${char}`,
+            );
+            foundError = true;
         }
     }
+}
+
+// file path
+const filename = args[1];
+
+const fileContent = fs.readFileSync(filename, "utf8");
+
+if (fileContent.length !== 0) {
+    let lines = fileContent.split("\n");
+
+    for (let line = 0; line < lines.length; line++) {
+        tokenizer(lines[line], line + 1);
+    }
     console.log("EOF  null");
+
+    if (foundError) {
+        process.exit(65);
+    }
 } else {
     console.log("EOF  null");
 }
