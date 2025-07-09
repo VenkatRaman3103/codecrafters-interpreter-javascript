@@ -247,6 +247,22 @@ function tokenizer(fileContent) {
 function parseExpression(tokens) {
     let index = 0;
 
+    function parseAddition() {
+        let left = parseMultiplication();
+
+        while (
+            index < tokens.length &&
+            (tokens[index].type === "PLUS" || tokens[index].type === "MINUS")
+        ) {
+            const operator = tokens[index].lexeme;
+            index++;
+            const right = parseMultiplication();
+            left = `(${operator} ${left} ${right})`;
+        }
+
+        return left;
+    }
+
     function parseMultiplication() {
         let left = parseUnary();
 
@@ -280,7 +296,7 @@ function parseExpression(tokens) {
     function parsePrimary() {
         if (tokens[index].type === "LEFT_PAREN") {
             index++;
-            const expr = parseMultiplication();
+            const expr = parseAddition();
             index++;
             return `(group ${expr})`;
         }
@@ -308,7 +324,7 @@ function parseExpression(tokens) {
         return null;
     }
 
-    return parseMultiplication();
+    return parseAddition();
 }
 
 // file path
