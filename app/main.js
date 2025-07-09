@@ -18,6 +18,15 @@ if (command !== "tokenize") {
     process.exit(1);
 }
 
+// tokenizer helper functions
+function isChar(ch) {
+    return (ch >= "a" && ch <= "z") || (ch >= "A" && ch <= "Z");
+}
+
+function isNumber(ch) {
+    return ch >= "0" && ch <= "9";
+}
+
 // tokenizer
 function tokenizer(fileContent, lineNumber) {
     for (let cursor = 0; cursor < fileContent.length; cursor++) {
@@ -128,6 +137,21 @@ function tokenizer(fileContent, lineNumber) {
             }
 
             console.log(`NUMBER ${number} ${literalValue}`);
+        } else if (isChar(char) || char == "_") {
+            let str = "";
+
+            while (
+                cursor < fileContent.length &&
+                (isChar(fileContent[cursor]) ||
+                    fileContent[cursor] == "_" ||
+                    isNumber(fileContent[cursor]))
+            ) {
+                str += fileContent[cursor];
+                cursor++;
+            }
+            cursor--;
+
+            console.log(`IDENTIFIER ${str} null`);
         } else if (
             char === " " ||
             char === "\t" ||
