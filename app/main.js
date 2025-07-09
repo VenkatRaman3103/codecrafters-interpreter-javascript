@@ -58,6 +58,22 @@ function tokenizer(fileContent, lineNumber) {
             } else {
                 console.log("BANG ! null");
             }
+        } else if (char == "<") {
+            if (fileContent[cursor + 1] == "=") {
+                console.log("LESS_EQUAL <= null");
+                cursor++;
+            } else {
+                console.log("LESS < null");
+            }
+        } else if (char == ">") {
+            if (fileContent[cursor + 1] == "=") {
+                console.log("GREATER_EQUAL >= null");
+                cursor++;
+            } else {
+                console.log("GREATER > null");
+            }
+        } else if (char == " ") {
+            continue;
         } else {
             console.error(
                 `[line ${lineNumber}] Error: Unexpected character: ${char}`,
