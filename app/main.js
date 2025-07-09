@@ -247,6 +247,25 @@ function tokenizer(fileContent) {
 function parseExpression(tokens) {
     let index = 0;
 
+    function parseComparison() {
+        let left = parseAddition();
+
+        while (
+            index < tokens.length &&
+            (tokens[index].type === "GREATER" ||
+                tokens[index].type === "GREATER_EQUAL" ||
+                tokens[index].type === "LESS" ||
+                tokens[index].type === "LESS_EQUAL")
+        ) {
+            const operator = tokens[index].lexeme;
+            index++;
+            const right = parseAddition();
+            left = `(${operator} ${left} ${right})`;
+        }
+
+        return left;
+    }
+
     function parseAddition() {
         let left = parseMultiplication();
 
@@ -296,7 +315,7 @@ function parseExpression(tokens) {
     function parsePrimary() {
         if (tokens[index].type === "LEFT_PAREN") {
             index++;
-            const expr = parseAddition();
+            const expr = parseComparison();
             index++;
             return `(group ${expr})`;
         }
@@ -324,7 +343,7 @@ function parseExpression(tokens) {
         return null;
     }
 
-    return parseAddition();
+    return parseComparison();
 }
 
 // file path
