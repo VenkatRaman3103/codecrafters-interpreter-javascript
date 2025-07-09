@@ -245,55 +245,31 @@ function tokenizer(fileContent) {
 }
 
 function parseExpression(tokens) {
-    let index = 0;
+    if (tokens[0].type === "LEFT_PAREN") {
+        const inner = parseExpression(tokens.slice(1));
+        return `(group ${inner})`;
+    }
 
-    function parseGrouping() {
-        if (tokens[index].type === "LEFT_PAREN") {
-            index++;
-            const expr = parseExpression();
-            if (tokens[index].type === "RIGHT_PAREN") {
-                index++;
-                return `(group ${expr})`;
-            } else {
-                return null;
-            }
+    const token = tokens[0];
+
+    if (token.type === "TRUE") {
+        return "true";
+    } else if (token.type === "FALSE") {
+        return "false";
+    } else if (token.type === "NIL") {
+        return "nil";
+    } else if (token.type === "NUMBER") {
+        const num = token.literal;
+        if (num % 1 === 0) {
+            return num.toFixed(1);
+        } else {
+            return num.toString();
         }
-        return parsePrimary();
+    } else if (token.type === "STRING") {
+        return token.literal;
     }
 
-    function parsePrimary() {
-        const token = tokens[index];
-
-        if (token.type === "TRUE") {
-            index++;
-            return "true";
-        } else if (token.type === "FALSE") {
-            index++;
-            return "false";
-        } else if (token.type === "NIL") {
-            index++;
-            return "nil";
-        } else if (token.type === "NUMBER") {
-            index++;
-            const num = token.literal;
-            if (num % 1 === 0) {
-                return num.toFixed(1);
-            } else {
-                return num.toString();
-            }
-        } else if (token.type === "STRING") {
-            index++;
-            return token.literal;
-        }
-
-        return null;
-    }
-
-    function parseExpression() {
-        return parseGrouping();
-    }
-
-    return parseExpression();
+    return null;
 }
 
 // file path
