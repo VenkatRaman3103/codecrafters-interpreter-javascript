@@ -254,6 +254,13 @@ function parseExpression(tokens) {
         return "false";
     } else if (token.type === "NIL") {
         return "nil";
+    } else if (token.type === "NUMBER") {
+        const num = token.literal;
+        if (num % 1 === 0) {
+            return num.toFixed(1);
+        } else {
+            return num.toString();
+        }
     }
 
     return null;
