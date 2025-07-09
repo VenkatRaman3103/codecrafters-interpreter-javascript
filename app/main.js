@@ -80,6 +80,23 @@ function tokenizer(fileContent, lineNumber) {
             } else {
                 console.log("SLASH / null");
             }
+        } else if (char === '"') {
+            let string = "";
+            cursor++;
+
+            while (cursor < fileContent.length && fileContent[cursor] !== '"') {
+                string += fileContent[cursor];
+                cursor++;
+            }
+
+            if (cursor < fileContent.length && fileContent[cursor] === '"') {
+                console.log(`STRING "${string}" ${string}`);
+            } else {
+                console.error(
+                    `[line ${lineNumber}] Error: Unterminated string.`,
+                );
+                foundError = true;
+            }
         } else if (
             char === " " ||
             char === "\t" ||
