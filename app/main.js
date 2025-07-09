@@ -33,6 +33,20 @@ if (fileContent.length !== 0) {
             console.log("LEFT_BRACE { null");
         } else if (char === "}") {
             console.log("RIGHT_BRACE } null");
+        } else if (char === "*") {
+            console.log("STAR * null");
+        } else if (char === ".") {
+            console.log("DOT . null");
+        } else if (char === ",") {
+            console.log("COMMA , null");
+        } else if (char === "+") {
+            console.log("PLUS + null");
+        } else if (char === "-") {
+            console.log("MINUS - null");
+        } else if (char === ";") {
+            console.log("SEMICOLON ; null");
+        } else if (char == "/") {
+            console.log("SLASH / null");
         }
     }
     console.log("EOF  null");
