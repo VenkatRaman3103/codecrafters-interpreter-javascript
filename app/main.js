@@ -245,37 +245,70 @@ function tokenizer(fileContent) {
 }
 
 function parseExpression(tokens) {
-    if (tokens[0].type === "LEFT_PAREN") {
-        const inner = parseExpression(tokens.slice(1));
-        return `(group ${inner})`;
-    } else if (tokens[0].type === "BANG") {
-        const inner = parseExpression(tokens.slice(1));
-        return `(! ${inner})`;
-    } else if (tokens[0].type === "MINUS") {
-        const inner = parseExpression(tokens.slice(1));
-        return `(- ${inner})`;
-    }
+    let index = 0;
 
-    const token = tokens[0];
+    function parseMultiplication() {
+        let left = parseUnary();
 
-    if (token.type === "TRUE") {
-        return "true";
-    } else if (token.type === "FALSE") {
-        return "false";
-    } else if (token.type === "NIL") {
-        return "nil";
-    } else if (token.type === "NUMBER") {
-        const num = token.literal;
-        if (num % 1 === 0) {
-            return num.toFixed(1);
-        } else {
-            return num.toString();
+        while (
+            index < tokens.length &&
+            (tokens[index].type === "STAR" || tokens[index].type === "SLASH")
+        ) {
+            const operator = tokens[index].lexeme;
+            index++;
+            const right = parseUnary();
+            left = `(${operator} ${left} ${right})`;
         }
-    } else if (token.type === "STRING") {
-        return token.literal;
+
+        return left;
     }
 
-    return null;
+    function parseUnary() {
+        if (tokens[index].type === "BANG") {
+            index++;
+            const expr = parseUnary();
+            return `(! ${expr})`;
+        } else if (tokens[index].type === "MINUS") {
+            index++;
+            const expr = parseUnary();
+            return `(- ${expr})`;
+        }
+
+        return parsePrimary();
+    }
+
+    function parsePrimary() {
+        if (tokens[index].type === "LEFT_PAREN") {
+            index++;
+            const expr = parseMultiplication();
+            index++;
+            return `(group ${expr})`;
+        }
+
+        const token = tokens[index];
+        index++;
+
+        if (token.type === "TRUE") {
+            return "true";
+        } else if (token.type === "FALSE") {
+            return "false";
+        } else if (token.type === "NIL") {
+            return "nil";
+        } else if (token.type === "NUMBER") {
+            const num = token.literal;
+            if (num % 1 === 0) {
+                return num.toFixed(1);
+            } else {
+                return num.toString();
+            }
+        } else if (token.type === "STRING") {
+            return token.literal;
+        }
+
+        return null;
+    }
+
+    return parseMultiplication();
 }
 
 // file path
