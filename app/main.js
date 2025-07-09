@@ -261,6 +261,8 @@ function parseExpression(tokens) {
         } else {
             return num.toString();
         }
+    } else if (token.type == "STRING") {
+        return token.literal;
     }
 
     return null;
