@@ -29,6 +29,10 @@ if (fileContent.length !== 0) {
             console.log("LEFT_PAREN ( null");
         } else if (char === ")") {
             console.log("RIGHT_PAREN ) null");
+        } else if (char === "{") {
+            console.log("LEFT_BRACE ( null");
+        } else if (char === "}") {
+            console.log("RIGHT_BRACE ) null");
         }
     }
     console.log("EOF  null");
