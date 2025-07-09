@@ -172,6 +172,8 @@ function tokenizer(fileContent, lineNumber) {
 
             if (keyword[str]) {
                 console.log(`${keyword[str]} ${str} null`);
+            } else {
+                console.log(`IDENTIFIER ${str} null`);
             }
         } else if (
             char === " " ||
