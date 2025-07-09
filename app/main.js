@@ -44,6 +44,13 @@ function tokenizer(fileContent, lineNumber) {
             console.log("SEMICOLON ; null");
         } else if (char == "/") {
             console.log("SLASH / null");
+        } else if (char == "=") {
+            if (fileContent[cursor + 1] == "=") {
+                console.log("EQUAL_EQUAL == null");
+                cursor++;
+            } else {
+                console.log("EQUAL = null");
+            }
         } else {
             console.error(
                 `[line ${lineNumber}] Error: Unexpected character: ${char}`,
