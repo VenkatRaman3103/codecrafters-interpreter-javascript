@@ -429,42 +429,19 @@ function evaluateExpr(expr) {
         return expr;
     }
 
-    console.log(typeof expr);
+    const tokens = expr
+        .replace(/^\(|\)$/g, "")
+        .trim()
+        .split(" ");
+    const operator = tokens[0];
+    const args = tokens.slice(1);
 
-    // const tokens = expr
-    //     .replace(/^\(|\)$/g, "")
-    //     .trim()
-    //     .split(" ");
-    // const operator = tokens[0];
-    // const args = tokens.slice(1);
-    //
-    // const left = evaluateExpr(args[0]);
-    // const right = evaluateExpr(args[1]);
-    //
-    // switch (operator) {
-    //     case "+":
-    //         return left + right;
-    //     case "-":
-    //         return left - right;
-    //     case "*":
-    //         return left * right;
-    //     case "/":
-    //         return left / right;
-    //     case "==":
-    //         return left === right;
-    //     case "!=":
-    //         return left !== right;
-    //     case "<":
-    //         return left < right;
-    //     case "<=":
-    //         return left <= right;
-    //     case ">":
-    //         return left > right;
-    //     case ">=":
-    //         return left >= right;
-    //     default:
-    //         throw new Error("Unknown operator: " + operator);
-    // }
+    switch (operator) {
+        case "group":
+            return evaluateExpr(args.join(" "));
+        default:
+            throw new Error("Unknown operator: " + operator);
+    }
 }
 
 // file path

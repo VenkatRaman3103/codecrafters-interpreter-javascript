@@ -1,4 +1,7 @@
+(true)
 10
+("hello world!")
+((false))
 "bar baz"
 10.40
 "hello world!"
