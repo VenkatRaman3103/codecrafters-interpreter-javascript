@@ -441,37 +441,40 @@ function evaluateExpr(expr) {
                 return -operand;
             }
 
-            const operatorMatch = content.match(
-                /^(==|!=|<=|>=|<|>|\+|-|\*|\/) (.+) (.+)$/,
-            );
-            if (operatorMatch) {
-                const [, operator, leftStr, rightStr] = operatorMatch;
-                const left = evaluateExpr(leftStr);
-                const right = evaluateExpr(rightStr);
+            const binaryMatch = content.match(/^(==|!=|<=|>=|<|>|\+|-|\*|\/) /);
+            if (binaryMatch) {
+                const operator = binaryMatch[1];
+                const restContent = content.substring(operator.length + 1);
+                const { left, right } = splitBinaryOperands(restContent);
 
-                switch (operator) {
-                    case "+":
-                        return left + right;
-                    case "-":
-                        return left - right;
-                    case "*":
-                        return left * right;
-                    case "/":
-                        return left / right;
-                    case "==":
-                        return left === right;
-                    case "!=":
-                        return left !== right;
-                    case "<":
-                        return left < right;
-                    case "<=":
-                        return left <= right;
-                    case ">":
-                        return left > right;
-                    case ">=":
-                        return left >= right;
-                    default:
-                        throw new Error("Unknown operator: " + operator);
+                if (left !== null && right !== null) {
+                    const leftVal = evaluateExpr(left);
+                    const rightVal = evaluateExpr(right);
+
+                    switch (operator) {
+                        case "+":
+                            return leftVal + rightVal;
+                        case "-":
+                            return leftVal - rightVal;
+                        case "*":
+                            return leftVal * rightVal;
+                        case "/":
+                            return leftVal / rightVal;
+                        case "==":
+                            return leftVal === rightVal;
+                        case "!=":
+                            return leftVal !== rightVal;
+                        case "<":
+                            return leftVal < rightVal;
+                        case "<=":
+                            return leftVal <= rightVal;
+                        case ">":
+                            return leftVal > rightVal;
+                        case ">=":
+                            return leftVal >= rightVal;
+                        default:
+                            throw new Error("Unknown operator: " + operator);
+                    }
                 }
             }
 
@@ -488,6 +491,31 @@ function evaluateExpr(expr) {
     }
 
     return expr;
+}
+
+function splitBinaryOperands(content) {
+    let parenCount = 0;
+    let start = 0;
+
+    while (start < content.length && content[start] === " ") {
+        start++;
+    }
+
+    for (let i = start; i < content.length; i++) {
+        const char = content[i];
+
+        if (char === "(") {
+            parenCount++;
+        } else if (char === ")") {
+            parenCount--;
+        } else if (char === " " && parenCount === 0) {
+            const left = content.substring(start, i).trim();
+            const right = content.substring(i + 1).trim();
+            return { left, right };
+        }
+    }
+
+    return { left: null, right: null };
 }
 
 // file path
