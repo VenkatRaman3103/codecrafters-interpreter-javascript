@@ -54,6 +54,12 @@ function isNumber(ch) {
     return ch >= "0" && ch <= "9";
 }
 
+function isTruthy(value) {
+    if (value === "nil" || value === null) return false;
+    if (typeof value === "boolean") return value;
+    return true;
+}
+
 // tokenizer
 function tokenizer(fileContent) {
     const tokens = [];
@@ -413,35 +419,75 @@ function parseExpression(tokens) {
 
 // evaluation
 function evaluateExpr(expr) {
-    if (typeof expr == "number") {
-        return expr;
-    }
+    if (typeof expr === "number") return expr;
+    if (typeof expr === "boolean") return expr;
+    if (expr === null) return null;
 
-    const isGroup = expr[0] == "(" && expr[expr.length - 1] == ")";
+    if (typeof expr === "string") {
+        if (expr.startsWith("(") && expr.endsWith(")")) {
+            const content = expr.slice(1, -1).trim();
 
-    if (typeof expr == "string" && !isGroup) {
-        if (!isNaN(Number(expr))) {
-            return Number(expr);
+            if (content.startsWith("group ")) {
+                return evaluateExpr(content.substring(6));
+            }
+
+            if (content.startsWith("! ")) {
+                const operand = evaluateExpr(content.substring(2));
+                return !isTruthy(operand);
+            }
+
+            if (content.startsWith("- ")) {
+                const operand = evaluateExpr(content.substring(2));
+                return -operand;
+            }
+
+            const operatorMatch = content.match(
+                /^(==|!=|<=|>=|<|>|\+|-|\*|\/) (.+) (.+)$/,
+            );
+            if (operatorMatch) {
+                const [, operator, leftStr, rightStr] = operatorMatch;
+                const left = evaluateExpr(leftStr);
+                const right = evaluateExpr(rightStr);
+
+                switch (operator) {
+                    case "+":
+                        return left + right;
+                    case "-":
+                        return left - right;
+                    case "*":
+                        return left * right;
+                    case "/":
+                        return left / right;
+                    case "==":
+                        return left === right;
+                    case "!=":
+                        return left !== right;
+                    case "<":
+                        return left < right;
+                    case "<=":
+                        return left <= right;
+                    case ">":
+                        return left > right;
+                    case ">=":
+                        return left >= right;
+                    default:
+                        throw new Error("Unknown operator: " + operator);
+                }
+            }
+
+            return evaluateExpr(content);
         }
+
+        // primitive
+        if (!isNaN(Number(expr))) return Number(expr);
         if (expr === "true") return true;
         if (expr === "false") return false;
         if (expr === "nil") return "nil";
+
         return expr;
     }
 
-    const tokens = expr
-        .replace(/^\(|\)$/g, "")
-        .trim()
-        .split(" ");
-    const operator = tokens[0];
-    const args = tokens.slice(1);
-
-    switch (operator) {
-        case "group":
-            return evaluateExpr(args.join(" "));
-        default:
-            throw new Error("Unknown operator: " + operator);
-    }
+    return expr;
 }
 
 // file path
