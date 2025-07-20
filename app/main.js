@@ -12,7 +12,7 @@ let foundError = false;
 // command
 const command = args[0];
 
-if (command !== "tokenize" && command !== "parse") {
+if (command !== "tokenize" && command !== "parse" && command !== "evaluate") {
     console.error(`Usage: Unknown command: ${command}`);
     process.exit(1);
 }
@@ -440,4 +440,9 @@ if (command === "tokenize") {
     if (result) {
         console.log(result);
     }
+} else if (command == "evaluate") {
+    const tokens = tokenizer(fileContent);
+
+    const result = parseExpression(tokens);
+    console.log(result);
 }
