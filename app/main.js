@@ -411,6 +411,62 @@ function parseExpression(tokens) {
     return result;
 }
 
+// evaluation
+function evaluateExpr(expr) {
+    if (typeof expr == "number") {
+        return expr;
+    }
+
+    const isGroup = expr[0] == "(" && expr[expr.length - 1] == ")";
+
+    if (typeof expr == "string" && !isGroup) {
+        if (!isNaN(Number(expr))) {
+            return Number(expr);
+        }
+        if (expr === "true") return true;
+        if (expr === "false") return false;
+        if (expr === "nil") return "nil";
+        return expr;
+    }
+
+    console.log(typeof expr);
+
+    // const tokens = expr
+    //     .replace(/^\(|\)$/g, "")
+    //     .trim()
+    //     .split(" ");
+    // const operator = tokens[0];
+    // const args = tokens.slice(1);
+    //
+    // const left = evaluateExpr(args[0]);
+    // const right = evaluateExpr(args[1]);
+    //
+    // switch (operator) {
+    //     case "+":
+    //         return left + right;
+    //     case "-":
+    //         return left - right;
+    //     case "*":
+    //         return left * right;
+    //     case "/":
+    //         return left / right;
+    //     case "==":
+    //         return left === right;
+    //     case "!=":
+    //         return left !== right;
+    //     case "<":
+    //         return left < right;
+    //     case "<=":
+    //         return left <= right;
+    //     case ">":
+    //         return left > right;
+    //     case ">=":
+    //         return left >= right;
+    //     default:
+    //         throw new Error("Unknown operator: " + operator);
+    // }
+}
+
 // file path
 const filename = args[1];
 
@@ -442,7 +498,12 @@ if (command === "tokenize") {
     }
 } else if (command == "evaluate") {
     const tokens = tokenizer(fileContent);
+    if (foundError) process.exit(65);
 
-    const result = parseExpression(tokens);
-    console.log(result);
+    const expr = parseExpression(tokens);
+    if (expr === null || expr.error) {
+        process.exit(65);
+    }
+
+    console.log(evaluateExpr(expr));
 }
